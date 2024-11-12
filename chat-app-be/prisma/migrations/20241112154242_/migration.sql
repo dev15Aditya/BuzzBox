@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE "ChatRoom" (
 CREATE TABLE "Message" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "senderId" TEXT NOT NULL,
+    "senderId" INTEGER NOT NULL,
     "chatRoomId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE "Message" (
 -- CreateTable
 CREATE TABLE "_ChatRoomParticipants" (
     "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
+    "B" INTEGER NOT NULL
 );
 
 -- CreateIndex

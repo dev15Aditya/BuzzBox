@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(uuid())
+  id            Int        @id @default(autoincrement())
   username      String     @unique
   phone         String
   password      String
@@ -39,7 +39,7 @@ model Message {
   id         String   @id @default(uuid())
   content    String
   Sender     User     @relation("MessageSender", fields: [senderId], references: [id])
-  senderId   String     
+  senderId   Int      // Change the type to Int
   ChatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
   chatRoomId String
   createdAt  DateTime @default(now())
