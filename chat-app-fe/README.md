@@ -1,0 +1,1 @@
+<!-- TODO: Add more features like file sharing or typing indicators -->

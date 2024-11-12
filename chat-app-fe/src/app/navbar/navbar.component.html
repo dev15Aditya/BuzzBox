@@ -1,0 +1,13 @@
+<nav class="navbar">
+    <a class="navbar-brand" routerLink="/home">Chat App</a>
+    <div class="navbar-buttons">
+        <a href="/">Home</a>
+        <a href="/chat">Chat</a>
+        <ng-container *ngIf="authenticated; else loginLink">
+            <button (click)="handleLogout()">Logout</button>
+        </ng-container>
+        <ng-template #loginLink>
+            <a href="/login">SignIn</a>
+        </ng-template>
+    </div>
+</nav>

@@ -1,0 +1,43 @@
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 65px);
+}
+/* Welcome message container */
+.welcome-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+  }
+  
+  /* Title style */
+  .welcome-title {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  /* Subtitle style */
+  .welcome-subtitle {
+    font-size: 1.2em;
+    color: #555;
+  }
+  
+  .welcome-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .welcome-container a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+  }

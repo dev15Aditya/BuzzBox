@@ -1,0 +1,82 @@
+/* Sign-in container */
+.signin-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Sign-in title */
+  .signin-title {
+    font-size: 1.8em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Form styles */
+  .signin-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Input fields */
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  /* Sign-in button */
+  .signin-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .signin-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Forgot password link */
+  .forgot-password {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .forgot-password a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .forgot-password a:hover {
+    text-decoration: underline;
+  }
