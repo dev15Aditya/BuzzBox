@@ -1,24 +1,15 @@
-import { PrismaClient, User } from "@prisma/client";
-import { ChatRoom } from "./chatroom";
+import { PrismaClient, User, ChatRoom, Message } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export interface Message {
-    id: string;
-    content: string;
-    sender: User;
-    chatRoom: ChatRoom;
-    createdAt: Date;
-    updatedAt: Date;
-  }
   
   export class MessageModel {
     static async findMany(chatRoomId: string): Promise<Message[]> {
       const messages = await prisma.message.findMany({
         where: { chatRoomId },
         include: {
-          sender: true,
-          chatRoom: true
+          Sender: true,
+          ChatRoom: true
         },
         orderBy: {
           createdAt: 'desc'
@@ -28,7 +19,7 @@ export interface Message {
       return messages.map(message => ({
         ...message,
         sender: {
-          ...message.sender,
+          ...message,
           password: undefined
         }
       }));
@@ -39,11 +30,11 @@ export interface Message {
         data: {
           content,
           chatRoomId,
-          senderId
+          senderId: Number(senderId)
         },
         include: {
-          sender: true,
-          chatRoom: true
+          Sender: true,
+          ChatRoom: true
         }
       });
     }

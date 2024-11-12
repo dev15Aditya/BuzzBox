@@ -3,7 +3,6 @@ import express from 'express';
 import {schema} from './graphql/schema'
 import { Socket } from 'socket.io';
 import { Context } from './graphql/types';
-import { testConnection } from './config/database';
 import cors from 'cors';
 import {expressMiddleware} from '@apollo/server/express4';
 import { AuthService } from './service/AuthService';
@@ -37,7 +36,6 @@ const server = new ApolloServer<Context>({
 // });
 
 async function startServer() {
-  await testConnection();
   await server.start();
   
   app.use(cors());

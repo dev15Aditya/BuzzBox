@@ -1,76 +1,83 @@
-import { PrismaClient, User } from '@prisma/client';
-import { Message } from './message';
-
-export interface ChatRoom {
-  id: string;
-  name?: string;
-  isGroup: boolean;
-  participants: User[];
-  messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { PrismaClient, User, Message, ChatRoom } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export class ChatRoomModel {
   static async findMany(userId: string): Promise<ChatRoom[]> {
-    return await prisma.chatRoom.findMany({
+    const chatRooms = await prisma.chatRoom.findMany({
       where: {
-        participants: {
+        Participants: {
           some: {
-            id: userId
+            id: parseInt(userId)
           }
         }
       },
       include: {
-        participants: true,
-        messages: {
+        Participants: true,
+        Messages: {
           orderBy: {
             createdAt: 'desc'
           },
           include: {
-            sender: true
+            Sender: true
           }
         }
       }
     });
+
+    return chatRooms.map(this.mapToChatRoom);
   }
 
   static async findById(id: string): Promise<ChatRoom | null> {
-    return await prisma.chatRoom.findUnique({
+    const chatRoom = await prisma.chatRoom.findUnique({
       where: { id },
       include: {
-        participants: true,
-        messages: {
+        Participants: true,
+        Messages: {
           orderBy: {
             createdAt: 'desc'
           },
           include: {
-            sender: true
+            Sender: true
           }
         }
       }
     });
+
+    return chatRoom ? this.mapToChatRoom(chatRoom) : null;
   }
 
-  static async create(name?: string, isGroup?: boolean, participantIds?: string[]): Promise<ChatRoom> {
-    return await prisma.chatRoom.create({
+  static async create(name?: string, isGroup = false, participantIds?: string[]): Promise<ChatRoom> {
+    const chatRoom = await prisma.chatRoom.create({
       data: {
         name,
         isGroup,
-        participants: {
-          connect: participantIds!.map(id => ({ id }))
+        Participants: {
+          connect: participantIds?.map(id => ({ id: parseInt(id) }))
         }
       },
       include: {
-        participants: true,
-        messages: {
+        Participants: true,
+        Messages: {
           include: {
-            sender: true
+            Sender: true
           }
         }
       }
     });
+
+    return this.mapToChatRoom(chatRoom);
+  }
+
+  private static mapToChatRoom(prismaChatRoom: ChatRoom & { Participants: User[]; Messages: Message[] }): ChatRoom {
+    return {
+      id: prismaChatRoom.id,
+      name: prismaChatRoom.name,
+      isGroup: prismaChatRoom.isGroup,
+      // participants: prismaChatRoom.Participants,
+      // messages: prismaChatRoom.Messages,
+      createdAt: prismaChatRoom.createdAt,
+      updatedAt: prismaChatRoom.updatedAt
+    };
   }
 }

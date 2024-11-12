@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { User, UserModel } from '../models/user';
+import { UserModel } from '../models/user';
+import { User } from '@prisma/client';
 
 export class AuthService {
   private static readonly JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';

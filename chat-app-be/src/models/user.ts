@@ -1,14 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-
-export interface User {
-  id: number;
-  username: string;
-  phone: string;
-  password?: string;
-  created_at?: Date;
-}
 
 const prisma = new PrismaClient();
 
@@ -54,7 +46,7 @@ export class UserModel {
         phone,
         password:hashedPassword,
       },
-      select: {id: true, username: true, phone: true, createdAt: true}
+      select: {id: true, username: true, phone: true, createdAt: true, updatedAt: true, password: true, name: true}
     })
   }
 
@@ -69,7 +61,7 @@ export class UserModel {
     if (!isValid) return null;
     
     // Don't return the password
-    const { password: _, ...userWithoutPassword } = user;
+    const { ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
