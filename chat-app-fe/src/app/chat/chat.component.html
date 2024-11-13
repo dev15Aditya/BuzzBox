@@ -1,32 +1,4 @@
-<div class="chat-container">
-    <div class="chat-header">
-      <h2>Chat Room</h2>
-      <p>Connected as: {{ username }}</p>
-    </div>
-    
-    <div class="messages-container">
-      <div *ngFor="let message of messages$ | async" class="message"
-           [ngClass]="{'own-message': message.user === username}">
-        <div class="message-header">
-          <span class="username">{{ message.user }}</span>
-          <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
-        </div>
-        <div class="message-content">
-          {{ message.message }}
-        </div>
-      </div>
-    </div>
-  
-    <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
-      <input type="text" 
-             formControlName="message" 
-             placeholder="Type a message..."
-             class="message-input">
-      <button type="submit" 
-              [disabled]="!messageForm.valid"
-              class="send-button">
-        Send
-      </button>
-    </form>
-  </div>
-  
+<div class="msg-chat">
+  <app-rooms></app-rooms>
+  <app-message></app-message>
+</div>
