@@ -25,12 +25,12 @@ const prisma = new PrismaClient();
       }));
     }
   
-    static async create(content: string, chatRoomId: string, senderId: string): Promise<Message> {
+    static async create(content: string, chatRoomId: string, senderId: number): Promise<Message> {
       return await prisma.message.create({
         data: {
           content,
           chatRoomId,
-          senderId: Number(senderId)
+          senderId
         },
         include: {
           Sender: true,

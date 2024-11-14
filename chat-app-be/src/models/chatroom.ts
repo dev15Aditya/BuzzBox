@@ -3,12 +3,12 @@ import { PrismaClient, User, Message, ChatRoom } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export class ChatRoomModel {
-  static async findMany(userId: string): Promise<ChatRoom[]> {
+  static async findMany(userId: number): Promise<ChatRoom[]> {
     const chatRooms = await prisma.chatRoom.findMany({
       where: {
         Participants: {
           some: {
-            id: parseInt(userId)
+            id: userId
           }
         }
       },
@@ -18,6 +18,7 @@ export class ChatRoomModel {
           orderBy: {
             createdAt: 'desc'
           },
+          take: 1,
           include: {
             Sender: true
           }
@@ -47,13 +48,13 @@ export class ChatRoomModel {
     return chatRoom ? this.mapToChatRoom(chatRoom) : null;
   }
 
-  static async create(name?: string, isGroup = false, participantIds?: string[]): Promise<ChatRoom> {
+  static async create(name?: string, isGroup = false, participantIds?: number[]): Promise<ChatRoom> {
     const chatRoom = await prisma.chatRoom.create({
       data: {
         name,
         isGroup,
         Participants: {
-          connect: participantIds?.map(id => ({ id: parseInt(id) }))
+          connect: participantIds?.map(id => ({ id: id }))
         }
       },
       include: {
