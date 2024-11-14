@@ -17,7 +17,7 @@ export class ChatService {
   public messages$ = this.messagesSubject.asObservable();
 
   constructor() {
-    this.socket = io('http://localhost:3000');
+    this.socket = io('http://localhost:3000/gra');
     
     this.socket.on('message', (message: ChatMessage) => {
       const currentMessages = this.messagesSubject.value;

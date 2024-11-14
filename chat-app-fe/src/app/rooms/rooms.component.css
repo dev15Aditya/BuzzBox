@@ -8,6 +8,8 @@
 
 .chat-header {
   background-color: #007bff;
+  display: flex;
+  justify-content: space-between;
   color: #fff;
   padding: 15px;
   text-align: center;

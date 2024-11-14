@@ -1,30 +1,20 @@
 <div class="chat-container">
-    <div class="chat-header">Chat Rooms</div>
-    <div class="chat-list">
-      <!-- Sample Chat Room 1 -->
-      <div class="chat-room">
-        <div class="avatar">A</div>
-        <div class="chat-details">
-          <div class="chat-room-name">Alice's Chat Room</div>
-          <div class="last-message">Hey, are you available for a quick call?</div>
+  <div class="chat-header">
+    <span>Chat Rooms</span>
+    <span class="create-room-button" (click)="onCreateRoom()">+</span>
+  </div>
+  <div class="chat-list">
+    <div 
+      *ngFor="let room of rooms" 
+      class="chat-room" 
+      >
+      <div class="avatar">{{ room.name.charAt(0) }}</div>
+      <div class="chat-details">
+        <div class="chat-room-name">{{ room.name }}</div>
+        <div class="last-message">
+          {{ room.messages.length ? room.messages[room.messages.length - 1].content : 'No messages yet' }}
         </div>
       </div>
-      <!-- Sample Chat Room 2 -->
-      <div class="chat-room">
-        <div class="avatar">B</div>
-        <div class="chat-details">
-          <div class="chat-room-name">Bob's Chat Room</div>
-          <div class="last-message">Great! Let's plan for the weekend.</div>
-        </div>
-      </div>
-      <!-- Sample Chat Room 3 -->
-      <div class="chat-room">
-        <div class="avatar">C</div>
-        <div class="chat-details">
-          <div class="chat-room-name">Carol's Chat Room</div>
-          <div class="last-message">Thanks for the update!</div>
-        </div>
-      </div>
-      <!-- Add more chat rooms as needed -->
     </div>
   </div>
+</div>

@@ -1,40 +1,34 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { ChatMessage, ChatService } from '../services/socket.service';
+import { Message } from '../models/message.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-message',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './message.component.html',
-  styleUrl: './message.component.css'
+  styleUrls: ['./message.component.css']
 })
 export class MessageComponent implements OnInit {
-  messages$: Observable<ChatMessage[]>;
-  messageForm: FormGroup;
-  username: string = '';
+  @Input() messages: Message[] = [];
+  @Output() sendMessage = new EventEmitter<string>();
 
-  constructor(
-    private chatService: ChatService,
-    private fb: FormBuilder
-  ) {
-    this.messages$ = this.chatService.messages$;
+  messageForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
     this.messageForm = this.fb.group({
-      message: ['', Validators.required]
+      content: ['', Validators.required]
     });
   }
 
-  ngOnInit() {
-    this.username = 'User' + Math.floor(Math.random() * 1000);
-  }
+  ngOnInit(): void {}
 
-  sendMessage() {
+  onSubmit(): void {
     if (this.messageForm.valid) {
-      const message = this.messageForm.get('message')?.value;
-      this.chatService.sendMessage(message, this.username);
-      this.messageForm.reset();
+      const content = this.messageForm.value.content;
+      this.sendMessage.emit(content);
+      this.messageForm.reset();  // Clear the form after sending
     }
   }
 }

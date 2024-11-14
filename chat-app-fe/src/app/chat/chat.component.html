@@ -1,4 +1,12 @@
 <div class="msg-chat">
-  <app-rooms></app-rooms>
-  <app-message></app-message>
+  <app-rooms 
+    [rooms]="chatRooms" 
+    (createRoom)="createRoom($event.name, $event.participantIds, $event.isGroup)">
+  </app-rooms>
+  
+  <app-message 
+    *ngIf="selectedRoom"
+    [messages]="messages"
+    (sendMessage)="sendMessage($event)">
+  </app-message>
 </div>

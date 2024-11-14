@@ -5,10 +5,13 @@
             <p class="subtitle">Join the conversation, connect with friends, and stay in touch with family.</p>
         </header>
 
-        <div class="button-group">
-            <a href="/login" class="btn">Login</a>
-            <a href="/register" class="btn register">Register</a>
-        </div>
+        <ng-container *ngIf="authenticated; else authType"></ng-container>
+        <ng-template #authType>
+            <div class="button-group">
+                <a href="/login" class="btn">Login</a>
+                <a href="/register" class="btn register">Register</a>
+            </div>
+        </ng-template>
 
         <section class="features">
             <h2>Why ChatConnect?</h2>
