@@ -1,48 +1,42 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+  ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  errorMessage: string = '';
-  loading: boolean = false;
+  username = '';
+  password = '';
+  loggedIn$ = this.authService.isAuthenticated$; 
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
-  }
+  constructor(private authService: AuthService, private router: Router) { }
 
-  async onSubmit() {
-    if(this.loginForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
+  onLogin() {
+    try{
+      this.authService.login(this.username, this.password);
 
-      try {
-        await this.authService.login(
-          this.loginForm.get('username')?.value,
-          this.loginForm.get('password')?.value
-        );
-        this.router.navigate(['/chat']);
-      } catch(err: any) {
-        this.errorMessage = err as string;
-      } finally {
-        this.loading = false;
+      if (this.loggedIn$) {
+        this.router.navigate(['/']);
       }
+    } catch(err) {
+      window.alert('Login failed')
     }
   }
 }

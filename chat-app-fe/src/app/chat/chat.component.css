@@ -1,8 +1,42 @@
-.msg-chat {
-  display: grid;
-  grid-template-columns: 30% auto;
-  height: 85vh;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  overflow: hidden;
-}
+/* chat.component.scss */
+:host {
+    display: block;
+    height: 100vh;
+  }
+  
+  .message-container {
+    scroll-behavior: smooth;
+  }
+  
+  .message {
+    max-width: 70%;
+    word-wrap: break-word;
+  }
+  
+  .message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+  
+  .chat-input {
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }

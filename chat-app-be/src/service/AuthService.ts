@@ -26,6 +26,7 @@ export class AuthService {
   static async register(username: string, phone: string, password: string) {
     // Check if user exists
     const exists = await UserModel.checkExisting(username, phone);
+    console.log(exists);
     if (exists) {
       throw new Error('Username or phone number already exists');
     }
@@ -34,7 +35,7 @@ export class AuthService {
     const user = await UserModel.create(username, phone, password);
     const token = this.generateToken(user.id);
 
-    return { user, token };
+    return { user: { id: user.id, username: user.username, phone: user.phone }, token };
   }
 
   static async login(username: string, password: string) {
@@ -44,6 +45,6 @@ export class AuthService {
     }
 
     const token = this.generateToken(user.id);
-    return { user, token };
+    return { user: { id: user.id, username: user.username, phone: user.phone }, token };
   }
 }

@@ -1,104 +1,58 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { User } from '../models/user.model';
-import { Apollo, gql } from 'apollo-angular';
-
-const REGISTER_MUTATION = gql`
-  mutation Register($username: String!, $phone: String!, $password: String!) {
-    register(username: $username, phone: $phone, password: $password) {
-      token
-      user {
-        id
-        username
-        phone
-      }
-    }
-  }
-`;
-
-const LOGIN_MUTATION = gql`
-  mutation Login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      token
-      user {
-        id
-        username
-        phone
-      }
-    }
-  }
-`;
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
-  
-  constructor(private apollo: Apollo) {
-    // Check localStorage for existing user session
-    const storedUser = localStorage.getItem('currentUser');
+  uri = 'http://localhost:3000/auth';
+
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  ngOnInit() {
     const token = localStorage.getItem('token');
-    if (storedUser && token) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
+    if (token) {
+      this.isAuthenticatedSubject.next(this.isLoggedIn);
     }
   }
+  isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  register(username: string, phone: string, password: string): Promise<User> {
-    return new Promise((resolve, reject) => {
-      this.apollo.mutate({
-        mutation: REGISTER_MUTATION,
-        variables: { username, phone, password }
-      }).subscribe({
-        next: ({data}: any) => {
-          const { user, token } = data.register;
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          localStorage.setItem('token', token);
-          this.currentUserSubject.next(user);
-          resolve(user);
-        },
-        error: (error) => {
-          reject(error);
-        }
-      })
-    });
+  constructor(private http: HttpClient) { }
+
+  // login method, save token in local storage
+  login(username: string, password: string) {
+    return this.http.post(`${this.uri}/login`, { username, password })
+      .subscribe((res: any) => {
+        console.log(res);
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        this.isAuthenticatedSubject.next(true);
+      });
   }
 
-  login(username: string, password: string): Promise<User> {
-    return new Promise((resolve, reject) => {
-      this.apollo.mutate({
-        mutation: LOGIN_MUTATION,
-        variables: {username, password}
-      }).subscribe({
-        next: ({data}: any) => {
-          const {user, token} = data.login;
-
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          localStorage.setItem('token', token);
-          this.currentUserSubject.next(user);
-          resolve(user);
-        },
-        error: (error) => {
-          reject(error);
-        }
+  register(username: string, phone: string, password: string) {
+    return this.http.post(`${this.uri}/register`, { username, phone, password })
+      .subscribe((res: any) => {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        this.isAuthenticatedSubject.next(true);
       })
-    });
   }
 
   logout() {
-    localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
-    this.currentUserSubject.next(null);
-
-    this.apollo.client.resetStore();
+    localStorage.removeItem('user');
+    this.isAuthenticatedSubject.next(false);
   }
 
-  isAuthenticated(): boolean {
-    return !!this.currentUserSubject.value && !!localStorage.getItem('token');
-  }
-
-  getToken(): string | null {
+  get token() {
     return localStorage.getItem('token');
+  }
+
+  get isLoggedIn() {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return !!localStorage.getItem('token');
   }
 }

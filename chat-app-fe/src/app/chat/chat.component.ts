@@ -1,61 +1,106 @@
-import { Component, OnInit } from '@angular/core';
-import { MessageComponent } from '../message/message.component';
-import { RoomsComponent } from '../rooms/rooms.component';
-import { ChatRoom } from '../models/room.model';
-import { Message } from '../models/message.model';
-import { ChatRoomService } from '../services/chat-room.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChatRoom, Message } from '../interfaces/chat.interface';
+import { Subscription } from 'rxjs';
+import { ChatService } from '../services/chat.service';
+import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, MessageComponent, RoomsComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss']
+  styleUrl: './chat.component.css'
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
   chatRooms: ChatRoom[] = [];
-  selectedRoom: ChatRoom | null = null;
+  currentRoom: ChatRoom | null = null;
   messages: Message[] = [];
+  newMessage: string = '';
+  private subscriptions: Subscription[] = [];
+  currentUser: any;
 
-  constructor(private chatRoomService: ChatRoomService) {}
+  constructor(
+    private chatService: ChatService,
+    private authService: AuthService
+  ) {
+    this.currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  }
 
   ngOnInit(): void {
-    // Subscribe to chat rooms list
-    this.chatRoomService.chatRooms$.subscribe((rooms: ChatRoom[]) => {
-      this.chatRooms = rooms;
-    });
-
-    // Load rooms initially
-    this.chatRoomService.loadChatRooms();
+    this.chatService.connectSocket();
+    this.loadChatRooms();
+    
+    this.subscriptions.push(
+      this.chatService.getCurrentChatRoom().subscribe(room => {
+        this.currentRoom = room;
+        if (room) {
+          this.loadMessages(room.id);
+        }
+      }),
+      
+      this.chatService.getChatMessages().subscribe(messages => {
+        this.messages = messages;
+      })
+    );
   }
 
-  // Select a chat room and load its messages
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.chatService.disconnectSocket();
+  }
+
+  loadChatRooms(): void {
+    this.chatService.getUserChats().subscribe(
+      rooms => this.chatRooms = rooms,
+      error => console.error('Error loading chat rooms:', error)
+    );
+  }
+
+  loadMessages(chatRoomId: string): void {
+    this.chatService.getChatHistory(chatRoomId).subscribe(
+      messages => this.messages = messages,
+      error => console.error('Error loading messages:', error)
+    );
+  }
+
   selectRoom(room: ChatRoom): void {
-    this.selectedRoom = room;
-    this.loadMessages(room.id);
+    this.chatService.setCurrentChatRoom(room);
   }
 
-  // Load messages for the selected room
-  loadMessages(roomId: string): void {
-    this.chatRoomService.getMessages(roomId).subscribe((messages: Message[]) => {
-      this.messages = messages;
-    });
+  sendMessage(): void {
+    if (!this.newMessage.trim() || !this.currentRoom) return;
+
+    this.chatService.sendMessage(this.currentRoom.id, this.newMessage).subscribe(
+      message => {
+        this.newMessage = '';
+      },
+      error => console.error('Error sending message:', error)
+    );
   }
 
-  // Send a message to the selected room
-  sendMessage(content: string): void {
-    if (!this.selectedRoom) return;
-
-    this.chatRoomService.sendMessage(this.selectedRoom.id, content).subscribe((newMessage: Message) => {
-      this.messages.push(newMessage); // Update messages in the current room
-    });
+  startPersonalChat(userId: string): void {
+    this.chatService.startPersonalChat(userId).subscribe(
+      room => {
+        this.chatRooms = [...this.chatRooms, room];
+        this.selectRoom(room);
+      },
+      error => console.error('Error starting chat:', error)
+    );
   }
 
-  // Handle room creation by calling the service method
-  createRoom(name: string, participantIds: string[], isGroup: boolean): void {
-    this.chatRoomService.createChatRoom(name, participantIds, isGroup).subscribe((newRoom: ChatRoom) => {
-      this.chatRooms.push(newRoom); // Add the new room to the list
-    });
+  createGroupChat(name: string, participantIds: string[]): void {
+    this.chatService.createGroupChat(name, participantIds).subscribe(
+      room => {
+        this.chatRooms = [...this.chatRooms, room];
+        this.selectRoom(room);
+      },
+      error => console.error('Error creating group:', error)
+    );
+  }
+
+  isOwnMessage(message: Message): boolean {
+    return message.senderId === this.currentUser.id;
   }
 }

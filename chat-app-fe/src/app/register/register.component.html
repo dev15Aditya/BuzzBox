@@ -1,55 +1,27 @@
 <div class="auth-container">
-    <div class="auth-card">
-      <h2>Register</h2>
-      
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input 
-            type="text" 
-            id="username"
-            formControlName="username"
-            [class.invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
-          <div class="error-message" *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
-            Username is required (min 3 characters)
-          </div>
-        </div>
-  
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input 
-            type="tel" 
-            id="phone"
-            formControlName="phone"
-            [class.invalid]="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
-          <div class="error-message" *ngIf="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
-            Please enter a valid 10-digit phone number
-          </div>
-        </div>
+    <h2>Register</h2>
+    <form #registerForm="ngForm" (ngSubmit)="onRegister()">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Username</mat-label>
+            <input matInput type="text" name="username" [(ngModel)]="username" required />
+        </mat-form-field>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password"
-            formControlName="password"
-            [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-            Password is required (min 6 characters)
-          </div>
-        </div>
-  
-        <div class="error-message" *ngIf="errorMessage">
-          {{ errorMessage }}
-        </div>
-  
-        <button type="submit" [disabled]="registerForm.invalid || loading">
-          {{ loading ? 'Registering...' : 'Register' }}
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone</mat-label>
+            <input matInput type="text" name="phone" [(ngModel)]="phone" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" name="password" [(ngModel)]="password" required />
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="!registerForm.valid">
+            Register
         </button>
-      </form>
-  
-      <p class="auth-link">
-        Already have an account? <a href="/login">Login</a>
-      </p>
-    </div>
-  </div>
+    </form>
+
+    <div style="margin-top: 10px;">
+        Already have a account? <a href="/login">Login</a>
+     </div>
+</div>

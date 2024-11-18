@@ -1,30 +1,30 @@
 import { Routes } from '@angular/router';
-import { AuthComponent } from './auth/auth.component';
-import { ChatComponent } from './chat/chat.component';
-import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
-import { AuthGuard } from './guards/auth.guard';
+import { HomeComponent } from './home/home.component';
+import { AuthGuard } from './guard/auth.guard';
+import { ChatComponent } from './chat/chat.component';
 
 export const routes: Routes = [
     {
         path: '',
-        component: HomeComponent
+        component: HomeComponent,
+        title: 'Welcome Chat App'
     },
     {
         path: 'login',
         component: LoginComponent,
-        title: 'Login',
+        title: 'Login to Chat App'
     },
     {
         path: 'register',
         component: RegisterComponent,
-        title: 'Register',
+        title: 'Register for Chat App'
     },
     {
         path: 'chat',
         component: ChatComponent,
-        title: 'Chat',
+        title: 'Messages',
         canActivate: [AuthGuard]
     }
 ];

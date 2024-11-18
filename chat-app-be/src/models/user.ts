@@ -70,10 +70,20 @@ export class UserModel {
       where: {
         OR: [
           {username},
-          {phone}
+          // {phone}
         ]
       }
     })
     return !!user;
+  }
+
+  static async allUser(): Promise<any | null> {
+    const user = await prisma.user.findMany();
+
+    if(!user) {
+      return null;
+    }
+
+    return user
   }
 }
