@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Socket, io } from 'socket.io-client';
 
@@ -29,17 +29,52 @@ export class ChatService {
   private chatMessages = new BehaviorSubject<Message[]>([]);
 
   constructor(private http: HttpClient) {
+    // Initialize socket with auth token
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
     this.socket = io('http://localhost:3000', {
       withCredentials: true,
-      autoConnect: false
+      autoConnect: false,
+      auth: {
+        token: token
+      }
     });
 
     this.setupSocketListeners();
+
+    // Listen for token changes (e.g., after login)
+    // window.addEventListener('storage', (e) => {
+    //   if (e.key === 'token') {
+    //     this.updateSocketAuth();
+    //   }
+    // });
+  }
+
+  private updateSocketAuth(): void {
+    const token = localStorage.getItem('token');
+    if (this.socket.connected) {
+      this.socket.disconnect();
+    }
+    this.socket = io('http://localhost:3000', {
+      withCredentials: true,
+      autoConnect: false,
+      // auth: {
+      //   token: token
+      // }
+    });
+    this.setupSocketListeners();
+    this.socket.connect();
   }
 
   private setupSocketListeners(): void {
     this.socket.on('connect', () => {
       console.log('Connected to WebSocket');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      if (error.message === 'Authentication error') {
+        // Handle authentication error (e.g., redirect to login)
+      }
     });
 
     this.socket.on('message', (message: Message) => {
@@ -49,19 +84,35 @@ export class ChatService {
 
     this.socket.on('CHAT_CREATED', (chatRoom: ChatRoom) => {
       // Handle new chat room creation
+      // You might want to update your local chat rooms list here
+      this.getUserChats().subscribe();
     });
 
     this.socket.on('GROUP_CREATED', (chatRoom: ChatRoom) => {
       // Handle new group creation
+      // You might want to update your local chat rooms list here
+      this.getUserChats().subscribe();
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('Disconnected from WebSocket:', reason);
+      if (reason === 'io server disconnect') {
+        // Server disconnected the client, try reconnecting
+        this.socket.connect();
+      }
     });
   }
 
   connectSocket(): void {
-    this.socket.connect();
+    if (!this.socket.connected) {
+      this.socket.connect();
+    }
   }
 
   disconnectSocket(): void {
-    this.socket.disconnect();
+    if (this.socket.connected) {
+      this.socket.disconnect();
+    }
   }
 
   getUserChats(): Observable<ChatRoom[]> {

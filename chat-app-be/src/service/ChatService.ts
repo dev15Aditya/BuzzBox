@@ -1,5 +1,6 @@
 import { ChatRoom, Message, PrismaClient } from "@prisma/client";
-import { WebSocketService } from "./SocketService";
+import { SocketEventType, WebSocketService } from "./SocketService";
+import { UserModel } from "../models/user";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,17 @@ export class ChatService {
 
     constructor() {
         this.wsManager = WebSocketService.getInstance();
+    }
+
+    // Get display name for a chat room based on the viewing user
+    private async getChatRoomDisplayName(room: ChatRoom & { Participants: any[] }, viewerId: number): Promise<string> {
+        if (room.isGroup) {
+            return room.name!;
+        }
+        
+        // For 1-1 chat, find the other participant and return their name
+        const otherParticipant = room.Participants.find(p => p.id !== viewerId);
+        return otherParticipant ? otherParticipant.name : 'Unknown User';
     }
 
     // 1-1 chat room
@@ -85,8 +97,9 @@ export class ChatService {
         message.ChatRoom.Participants.forEach(participant => {
             if (participant.id != senderId) {
                 this.wsManager.sendMessage(participant.id, {
-                    type: 'NEW_MESSAGE',
-                    data: message
+                    type: SocketEventType.MESSAGE,
+                    data: message,
+                    timestamp: Date.now(),
                 });
             }
         });
@@ -112,8 +125,28 @@ export class ChatService {
     }
 
     // Get user's chat rooms
+    // async getUserChatRooms(userId: number): Promise<ChatRoom[]> {
+    //     return await prisma.chatRoom.findMany({
+    //         where: {
+    //             Participants: {
+    //                 some: {
+    //                     id: userId
+    //                 }
+    //             }
+    //         },
+    //         include: {
+    //             Participants: true,
+    //             Messages: {
+    //                 orderBy: {
+    //                     createdAt: 'desc'
+    //                 },
+    //                 take: 1
+    //             }
+    //         }
+    //     });
+    // }
     async getUserChatRooms(userId: number): Promise<ChatRoom[]> {
-        return await prisma.chatRoom.findMany({
+        const rooms = await prisma.chatRoom.findMany({
             where: {
                 Participants: {
                     some: {
@@ -131,6 +164,16 @@ export class ChatService {
                 }
             }
         });
+
+        // Add display names for each room
+        const roomsWithDisplayNames = await Promise.all(
+            rooms.map(async (room) => ({
+                ...room,
+                displayName: await this.getChatRoomDisplayName(room, userId)
+            }))
+        );
+
+        return roomsWithDisplayNames;
     }
 
     // Add participant to group

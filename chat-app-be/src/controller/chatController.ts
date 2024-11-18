@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ChatService } from '../service/ChatService';
-import { WebSocketService } from '../service/SocketService';
+import { SocketEventType, WebSocketService } from '../service/SocketService';
 
 export class ChatController {
     private chatService: ChatService;
@@ -14,7 +14,11 @@ export class ChatController {
     // Get user's chat rooms
     getUserChats = async (req: Request, res: Response) => {
         try {
-            const userId = req.user && req.user.id; // From auth middleware
+            const userId = req.user && req.user.id;
+            if(!userId) {
+                res.status(401).json({ message: 'Unauthorized' });
+            }
+
             const chats = await this.chatService.getUserChatRooms(userId!);
             res.json(chats);
         } catch (error) {
@@ -28,17 +32,20 @@ export class ChatController {
             const { otherUserId } = req.body;
             const userId = req.user && req.user.id;
             
-            const chatRoom = await this.chatService.getOrCreatePersonalChat(userId!, otherUserId);
+            if(!userId) {
+                res.status(401).json({ message: 'Unauthorized' });
+            }
+            
+            const chatRoom = await this.chatService.getOrCreatePersonalChat(userId!, parseInt(otherUserId));
             
             // If users are online, make them join the room
             if (this.wsService.isUserOnline(userId!)) {
-                const socketId = this.wsService.getUserSocketId(userId!);
-                if (socketId) {
-                    this.wsService.broadcastToRoom(chatRoom.id, {
-                        type: 'CHAT_CREATED',
-                        data: chatRoom
-                    });
-                }
+                this.wsService.broadcastToRoom(chatRoom.id, {
+                    type: SocketEventType.MESSAGE,
+                    data: chatRoom,
+                    timestamp: Date.now(),
+                    roomId: chatRoom.id
+                })
             }
             
             res.json(chatRoom);
@@ -57,9 +64,11 @@ export class ChatController {
             participantIds.forEach((participantId: number) => {
                 if (this.wsService.isUserOnline(participantId)) {
                     this.wsService.sendMessage(participantId, {
-                        type: 'GROUP_CREATED',
-                        data: chatRoom
-                    });
+                        type: SocketEventType.MESSAGE,
+                        data: chatRoom,
+                        timestamp: Date.now(),
+                        roomId: chatRoom.id
+                    })
                 }
             });
             
@@ -74,6 +83,10 @@ export class ChatController {
         try {
             const { chatRoomId, content } = req.body;
             const userId = req.user && req.user.id;
+
+            if(!userId) {
+                res.status(401).json({ message: 'Unauthorized' });
+            }
             
             const message = await this.chatService.sendMessage(userId!, chatRoomId, content);
             res.json(message);
@@ -109,8 +122,10 @@ export class ChatController {
             // Notify the added user if online
             if (this.wsService.isUserOnline(userId)) {
                 this.wsService.sendMessage(userId, {
-                    type: 'ADDED_TO_GROUP',
-                    data: updatedRoom
+                    type: SocketEventType.MESSAGE,
+                    data: updatedRoom,
+                    timestamp: Date.now(),
+                    roomId: chatRoomId
                 });
             }
             
@@ -129,8 +144,10 @@ export class ChatController {
             // Notify the removed user if online
             if (this.wsService.isUserOnline(userId)) {
                 this.wsService.sendMessage(userId, {
-                    type: 'REMOVED_FROM_GROUP',
-                    data: updatedRoom
+                    type: SocketEventType.MESSAGE,
+                    data: updatedRoom,
+                    timestamp: Date.now(),
+                    roomId: chatRoomId
                 });
             }
             

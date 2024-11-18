@@ -16,9 +16,13 @@ export class AuthService {
 
   static async verifyToken(token: string): Promise<User | null> {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as { id: number };
+      // Remove 'Bearer ' prefix if present
+      const tokenString = token.startsWith('Bearer ') ? token.slice(7) : token;
+      
+      const decoded = jwt.verify(tokenString, this.JWT_SECRET) as { id: number };
       return await UserModel.findById(decoded.id);
     } catch (error) {
+      console.error('Token verification error:', error);
       return null;
     }
   }
@@ -46,5 +50,13 @@ export class AuthService {
 
     const token = this.generateToken(user.id);
     return { user: { id: user.id, username: user.username, phone: user.phone }, token };
+  }
+
+  static async getAllUsers() {
+    const users = await UserModel.allUser();
+
+    return users.map((user: User) => {
+      return { id: user.id, username: user.username, phone: user.phone };
+    });
   }
 }

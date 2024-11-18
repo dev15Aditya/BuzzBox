@@ -86,4 +86,12 @@ export class UserModel {
 
     return user
   }
+
+  static async findUserNameById(userId: number): Promise<String | null > {
+    const user = await prisma.user.findFirst({
+      where: {id: userId}
+    })
+
+    return user?.username ?? null;
+  }
 }

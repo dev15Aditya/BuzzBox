@@ -1,63 +1,75 @@
-<!-- chat.component.html -->
-<div class="flex h-screen bg-gray-100">
-    <!-- Sidebar -->
-    <div class="w-1/4 bg-white border-r">
-      <div class="p-4 border-b">
-        <h2 class="text-xl font-semibold">Chats</h2>
-      </div>
-      <div class="overflow-y-auto h-[calc(100vh-4rem)]">
-        <div *ngFor="let room of chatRooms" 
-             (click)="selectRoom(room)"
-             class="p-4 border-b hover:bg-gray-50 cursor-pointer"
-             [class.bg-blue-50]="currentRoom?.id === room.id">
-          <div class="font-medium">{{ room.name }}</div>
-          <div class="text-sm text-gray-500">
-            <!-- {{ room.lastMessage?.content || 'No messages yet' }} -->
+<div class="chat-container">
+  <!-- Chat Rooms List -->
+  <mat-card class="chat-rooms">
+    <mat-card-header>
+      <mat-card-title>Chats</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item
+          *ngFor="let room of chatRooms"
+          [class.active]="currentChatRoom?.id === room.id"
+          (click)="selectChatRoom(room)"
+        >
+          <div class="chat-room-item">
+            <span>{{ room.name }}</span>
+            <small *ngIf="room.lastMessage">
+              {{ room.lastMessage.content | slice:0:30 }}...
+            </small>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Chat Messages -->
+  <mat-card class="chat-messages" *ngIf="currentChatRoom">
+    <mat-card-header>
+      <mat-card-title>{{ currentChatRoom.name }}</mat-card-title>
+      <mat-card-subtitle *ngIf="currentChatRoom.type === 'group'">
+        {{ currentChatRoom.participants.length }} participants
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content #messageContainer class="message-container">
+      <div class="messages">
+        <div
+          *ngFor="let message of messages"
+          [class.own-message]="message.senderId === currentUserId"
+          class="message-bubble"
+        >
+          <div class="message-content">
+            <small class="sender-name" *ngIf="currentChatRoom.type === 'group'">
+              {{ getSenderName(message.senderId) }}
+            </small>
+            <p>{{ message.content }}</p>
+            <small class="timestamp">
+              {{ message.timestamp | date:'short' }}
+            </small>
           </div>
         </div>
       </div>
-    </div>
-  
-    <!-- Chat Area -->
-    <div class="flex-1 flex flex-col">
-      <!-- Chat Header -->
-      <div class="p-4 border-b bg-white">
-        <h3 class="text-lg font-medium">
-          {{ currentRoom?.name || 'Select a chat' }}
-        </h3>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <div class="message-input">
+        <mat-form-field appearance="outline" class="full-width">
+          <input
+            matInput
+            [(ngModel)]="newMessage"
+            placeholder="Type a message..."
+            (keyup.enter)="sendMessage()"
+          >
+        </mat-form-field>
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim()"
+        >
+          <mat-icon>send</mat-icon>
+        </button>
       </div>
-  
-      <!-- Messages -->
-      <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
-        <div *ngFor="let message of messages" 
-             class="mb-4 flex"
-             [class.justify-end]="isOwnMessage(message)">
-          <div [class.bg-blue-500]="isOwnMessage(message)"
-               [class.bg-white]="!isOwnMessage(message)"
-               [class.text-white]="isOwnMessage(message)"
-               class="max-w-[70%] rounded-lg p-3 shadow">
-            <div class="text-sm">{{ message.content }}</div>
-            <div class="text-xs mt-1 opacity-75">
-              <!-- {{ message.timestamp | date:'short' }} -->
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Message Input -->
-      <div class="p-4 bg-white border-t">
-        <div class="flex">
-          <input type="text" 
-                 [(ngModel)]="newMessage"
-                 (keyup.enter)="sendMessage()"
-                 placeholder="Type a message..."
-                 class="flex-1 border rounded-l-lg px-4 py-2 focus:outline-none focus:border-blue-500">
-          <button (click)="sendMessage()"
-                  [disabled]="!newMessage.trim()"
-                  class="bg-blue-500 text-white px-6 py-2 rounded-r-lg hover:bg-blue-600 disabled:opacity-50">
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -54,5 +54,10 @@ export class AuthService {
       return false;
     }
     return !!localStorage.getItem('token');
+  }
+
+  getAllUsers () {
+    return this.http.get<{ message: string, users: any[] }>(`${this.uri}/users`)
+      .pipe(map(response => response.users));
   }
 }

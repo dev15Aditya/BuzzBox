@@ -1,28 +1,42 @@
-import { NextFunction, Request, Response } from "express";
-import { AuthService } from "../service/AuthService";
+import { NextFunction, Request, Response } from 'express';
+import { AuthService } from '../service/AuthService';
 
+// Add interface to extend Request with user property
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const token = req.headers.authorization;
+export const authMiddleware = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
 
-  if (!token) {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
+    if (!authHeader) {
+      res.status(401).json({ error: 'Unauthorized - No token provided' });
+      return;
+    }
 
-  // Verify token
-  const user = await AuthService.verifyToken(token!);
+    // Check for Bearer token format
+    if (!authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'Invalid token format' });
+      return;
+    }
 
-  if (!user) {
-    res.status(401).json({ error: 'Unauthorized' });
-  }
+    // Verify token
+    const user = await AuthService.verifyToken(authHeader);
 
-  // Attach user to request object
-  if (user) {
+    if (!user) {
+      res.status(401).json({ error: 'Unauthorized - Invalid token' });
+      return;
+    }
+
+    // Attach user to request object
     req.user = user;
-    next();
-  } else {
-    res.status(401).json({ error: 'Unauthorized' });
+    return next();
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  next();
 };
