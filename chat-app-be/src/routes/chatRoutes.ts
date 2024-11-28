@@ -21,4 +21,7 @@ router.get('/messages/:chatRoomId', chatController.getChatHistory);
 router.post('/group/add', chatController.addToGroup);
 router.post('/group/remove', chatController.removeFromGroup);
 
+// Get users to chat
+router.get('/getUsers', chatController.getAvailableUsers);
+
 export default router;

@@ -156,4 +156,19 @@ export class ChatController {
             res.status(500).json({ message: 'Error removing user from group' });
         }
     };
+
+    // Get available user for chatting
+    getAvailableUsers = async (req: Request, res: Response) => {
+        try{
+            const userId = req.user && req.user.id;
+            if(!userId) {
+                res.status(401).json({ message: 'Unauthorized' });
+            }
+
+            const users = await this.chatService.getAvailableUsers(userId!);
+            res.json(users);
+        } catch(error) {
+            res.status(500).json({ message: 'Error fetching users' });
+        }
+    }
 }

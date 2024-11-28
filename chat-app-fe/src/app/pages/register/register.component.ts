@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,24 +17,25 @@ import { Router } from '@angular/router';
     MatInputModule,
     MatButtonModule,
   ],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  templateUrl: './register.component.html'
 })
 export class RegisterComponent {
   username = '';
   phone = '';
   password = '';
-  loggedIn$ = this.authService.isAuthenticated$; 
 
   constructor(private authService: AuthService, private router: Router) {}
 
   onRegister() {
     try{
-      this.authService.register(this.username, this.phone, this.password);
-      
-      if (this.loggedIn$) {
-        this.router.navigate(['/']);
-      }
+      this.authService.register(this.username, this.phone, this.password).subscribe((res: any) => {
+        if(res.message === 'Login successful') {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('username', res.user.username);
+          this.router.navigate(['/chat']);
+        }
+      })
+ 
     } catch(err) {window.alert('Signup failed')}
   }
 }

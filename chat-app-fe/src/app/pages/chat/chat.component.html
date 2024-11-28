@@ -1,0 +1,52 @@
+<div class="flex flex-col h-screen md:flex-row bg-gray-100 overflow-hidden">
+    <!-- Left Sidebar: List of Chats -->
+    <div class="w-full md:w-1/3 lg:w-1/4 bg-white shadow-md">
+        <div class="p-4 bg-[#3f51b5] text-white">
+            <h2 class="text-lg font-semibold">Chats</h2>
+        </div>
+        <div class="overflow-y-auto h-full custom-scroll">
+            <!-- Chat Item -->
+            <div *ngFor="let user of users" class="p-4 hover:bg-blue-50 cursor-pointer border-b">
+                <p class="text-sm font-semibold capitalize">{{user.username}}</p>
+                <p class="text-xs text-gray-500 truncate">Hey, are you available?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Chat Section -->
+    <div class="flex flex-col flex-1 bg-gray-100 custom-scroll">
+        <!-- Chat Header -->
+        <div class="flex items-center justify-between p-4 bg-[#3f51b5] text-white shadow-md">
+            <h2 class="text-lg font-semibold">John Doe</h2>
+            <button (click)="onLogout()" class="p-2 rounded-md bg-blue-500 hover:bg-blue-400">
+                Logout
+            </button>
+        </div>
+
+        <!-- Messages Section -->
+        <div class="flex-1 p-4 overflow-y-auto">
+            <!-- Message from another user -->
+            <div class="flex mb-4">
+                <div class="max-w-xs px-4 py-2 bg-gray-300 rounded-lg">
+                    <p class="text-sm">Hi there! How are you?</p>
+                </div>
+            </div>
+
+            <!-- Message from the current user -->
+            <div class="flex justify-end mb-4">
+                <div class="max-w-xs px-4 py-2 text-white bg-blue-600 rounded-lg">
+                    <p class="text-sm">I'm good, thanks! How about you?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="flex items-center p-4 bg-white shadow-md">
+            <input type="text" placeholder="Type a message..."
+                class="flex-1 px-4 py-2 mr-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <button class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-500">
+                Send
+            </button>
+        </div>
+    </div>
+</div>

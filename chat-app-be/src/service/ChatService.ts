@@ -1,4 +1,4 @@
-import { ChatRoom, Message, PrismaClient } from "@prisma/client";
+import { ChatRoom, Message, PrismaClient, User } from "@prisma/client";
 import { SocketEventType, WebSocketService } from "./SocketService";
 import { UserModel } from "../models/user";
 
@@ -16,7 +16,7 @@ export class ChatService {
         if (room.isGroup) {
             return room.name!;
         }
-        
+
         // For 1-1 chat, find the other participant and return their name
         const otherParticipant = room.Participants.find(p => p.id !== viewerId);
         return otherParticipant ? otherParticipant.name : 'Unknown User';
@@ -233,6 +233,21 @@ export class ChatService {
             include: {
                 Participants: true
             }
+        });
+    }
+
+    // Gets users available for chatting with the current user
+    async getAvailableUsers(userId: number): Promise<UserModel[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                id: {
+                    not: userId
+                }
+            }
+        });
+
+        return users.map((user: User) => {
+            return { id: user.id, username: user.username, phone: user.phone };
         });
     }
 }

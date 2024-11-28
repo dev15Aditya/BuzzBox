@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map } from 'rxjs';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,52 +8,26 @@ import { BehaviorSubject, map } from 'rxjs';
 export class AuthService {
   uri = 'http://localhost:3000/auth';
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  ngOnInit() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.isAuthenticatedSubject.next(this.isLoggedIn);
-    }
-  }
-  isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-
   constructor(private http: HttpClient) { }
 
-  // login method, save token in local storage
+  isLoggedIn() {
+    if (typeof window !== 'undefined' && localStorage) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = atob(token.split('.')[1]);
+        const parsedPayload = JSON.parse(payload);
+        return parsedPayload.exp > Date.now() / 1000;
+      }
+    }
+    return false;
+  }
+
   login(username: string, password: string) {
     return this.http.post(`${this.uri}/login`, { username, password })
-      .subscribe((res: any) => {
-        console.log(res);
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        this.isAuthenticatedSubject.next(true);
-      });
   }
 
   register(username: string, phone: string, password: string) {
     return this.http.post(`${this.uri}/register`, { username, phone, password })
-      .subscribe((res: any) => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        this.isAuthenticatedSubject.next(true);
-      })
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.isAuthenticatedSubject.next(false);
-  }
-
-  get token() {
-    return localStorage.getItem('token');
-  }
-
-  get isLoggedIn() {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return !!localStorage.getItem('token');
   }
 
   getAllUsers () {

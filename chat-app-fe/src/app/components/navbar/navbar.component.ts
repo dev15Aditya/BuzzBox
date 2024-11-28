@@ -4,10 +4,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -25,27 +24,17 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 })
 export class NavbarComponent implements OnInit {
   sidenavOpened = false;
-  currentUser: string = '';
+  isLoggedIn = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    if (typeof window !== 'undefined') {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      this.currentUser = user.username || '';
-  
-      this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
-        if (isAuthenticated) {
-          this.currentUser = user.username || '';
-        }
-      });
-    }
+    this.isLoggedIn = this.authService.isLoggedIn();
   }
 
   onLogout() {
-    this.authService.logout();
+    localStorage.removeItem('token');
     this.router.navigate(['/login']);
-    window.location.reload();
   }
 
   toggleSidenav() {
